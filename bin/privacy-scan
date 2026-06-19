@@ -3,12 +3,12 @@
 
 declare(strict_types=1);
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+require dirname(__DIR__, 3) . '/autoload.php';
 
 use Lvmorales1\PrivacyScanner\Commands\ScanCommand;
 use Symfony\Component\Console\Application;
 
 $app = new Application('Privacy Scanner');
-$app->addCommand(new ScanCommand());
+$app->add(new ScanCommand());
 $app->setDefaultCommand('scan', true);
 $app->run();
