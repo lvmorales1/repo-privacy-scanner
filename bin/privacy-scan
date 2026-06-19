@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require dirname(__DIR__) . '/vendor/autoload.php';
+
+use PrivacyScanner\Commands\ScanCommand;
+use Symfony\Component\Console\Application;
+
+$app = new Application('Privacy Scanner', '1.0.0');
+$app->add(new ScanCommand());
+$app->setDefaultCommand('scan', true);
+$app->run();
