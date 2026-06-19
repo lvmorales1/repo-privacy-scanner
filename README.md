@@ -4,11 +4,29 @@ Scans files and directories for secrets and personal data that shouldn't be in y
 
 ## Install
 
+As a project dependency:
+
+```bash
+composer require lvmorales1/privacy-scanner
+```
+
+For standalone development:
+
 ```bash
 composer install
 ```
 
 ## Usage
+
+When installed as a dependency:
+
+```bash
+./vendor/bin/privacy-scan scan .
+./vendor/bin/privacy-scan scan config/services.php
+./vendor/bin/privacy-scan scan . --format=json
+```
+
+When running standalone:
 
 ```bash
 php bin/privacy-scan scan .
