@@ -10,11 +10,32 @@ use Symfony\Component\Finder\SplFileInfo;
 
 final class FileScanner
 {
-    private const EXCLUDED_DIRS = ['vendor', 'node_modules', '.git'];
+    private const EXCLUDED_DIRS = [
+        'vendor',
+        'node_modules',
+        '.git',
+        'storage',
+        'bootstrap/cache',
+        '.cache',
+        'cache',
+        'tmp',
+        'temp',
+        'dist',
+        'build',
+        '.next',
+        '.nuxt',
+    ];
 
-    private const EXCLUDED_EXTENSIONS = ['lock', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'pdf', 'zip', 'gz', 'ico', 'woff', 'woff2', 'ttf'];
+    private const EXCLUDED_EXTENSIONS = [
+        'lock', 'log',
+        'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'webp',
+        'pdf', 'zip', 'gz', 'tar', 'rar', '7z',
+        'woff', 'woff2', 'ttf', 'eot',
+        'mp4', 'mp3', 'avi', 'mov',
+        'exe', 'bin', 'so', 'dll',
+    ];
 
-    private const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+    private const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
     /** @param DetectorInterface[] $detectors */
     public function __construct(private readonly array $detectors) {}
@@ -31,7 +52,8 @@ final class FileScanner
         $finder = (new Finder())
             ->files()
             ->in($path)
-            ->exclude(self::EXCLUDED_DIRS);
+            ->exclude(self::EXCLUDED_DIRS)
+            ->ignoreVCSIgnored(true);
 
         foreach ($finder as $file) {
             if ($this->shouldSkip($file)) {
