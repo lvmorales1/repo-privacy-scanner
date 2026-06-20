@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lvmorales1\PrivacyScanner\Commands;
 
+use Lvmorales1\PrivacyScanner\Config\ScanConfig;
 use Lvmorales1\PrivacyScanner\Detectors\PersonalDataDetector;
 use Lvmorales1\PrivacyScanner\Detectors\SecretDetector;
 use Lvmorales1\PrivacyScanner\Reporters\ConsoleReporter;
@@ -42,11 +43,13 @@ final class ScanCommand extends Command
             new PersonalDataDetector(),
         ]);
 
+        $config = ScanConfig::fromFile(getcwd() . '/privacy-scan.json');
+
         $result = $scanner->scan($realPath);
 
         $this->resolveReporter($input->getOption('format'))->report($result, $output);
 
-        return $result->isEmpty() ? Command::SUCCESS : Command::FAILURE;
+        return $result->hasFailingFindings($config) ? Command::FAILURE : Command::SUCCESS;
     }
 
     private function resolveReporter(string $format): ReporterInterface
