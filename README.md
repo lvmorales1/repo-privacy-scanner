@@ -52,6 +52,55 @@ Scanned 42 file(s) — 2 finding(s) — Risk Score: 15/100
 
 Exit code is `0` when clean, `1` when findings are found.
 
+## Configuration
+
+Create a `privacy-scan.json` file in your project root to control when the scanner exits with `1`:
+
+```json
+{
+    "fail_on_score": 1,
+    "fail_on_severity": "LOW"
+}
+```
+
+| Option | Default | Description |
+|---|---|---|
+| `fail_on_score` | `1` | Minimum per-finding risk score to trigger exit `1` |
+| `fail_on_severity` | `"LOW"` | Minimum severity to trigger exit `1`. Accepted values: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` |
+
+Both thresholds must be met for a finding to trigger exit `1`. For example, to only fail on `HIGH` or `CRITICAL` findings:
+
+```json
+{
+    "fail_on_severity": "HIGH"
+}
+```
+
+## Rules
+
+Severity is derived from the risk score: **LOW** 1–3 · **MEDIUM** 4–5 · **HIGH** 6–7 · **CRITICAL** 8–10
+
+### Secrets
+
+| Rule | Category | Score | Severity |
+|---|---|---|---|
+| SSH Private Key | `ssh_private_key` | 10 | CRITICAL |
+| AWS Access Key | `aws_key` | 9 | CRITICAL |
+| Stripe Live Key | `stripe_key` | 9 | CRITICAL |
+| Database Connection URL | `database_url` | 8 | CRITICAL |
+| GitHub Token | `github_token` | 8 | CRITICAL |
+| OpenAI API Key | `openai_key` | 8 | CRITICAL |
+| JSON Web Token | `jwt` | 7 | HIGH |
+
+### Personal Data
+
+| Rule | Category | Score | Severity |
+|---|---|---|---|
+| CPF (Brazilian Tax ID) | `cpf` | 6 | HIGH |
+| CNPJ (Brazilian Company ID) | `cnpj` | 5 | MEDIUM |
+| Brazilian Phone Number | `phone_br` | 4 | MEDIUM |
+| Email Address | `email` | 3 | LOW |
+
 ## Adding a new rule
 
 Create a class in `src/Rules/Secrets/` or `src/Rules/PersonalData/`, extend `AbstractRule`, and register it in the corresponding detector.

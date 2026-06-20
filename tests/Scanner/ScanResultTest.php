@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lvmorales1\PrivacyScanner\Tests\Scanner;
 
+use Lvmorales1\PrivacyScanner\Config\ScanConfig;
 use Lvmorales1\PrivacyScanner\Enums\FindingType;
 use Lvmorales1\PrivacyScanner\Enums\Severity;
 use Lvmorales1\PrivacyScanner\Finding;
@@ -60,6 +61,63 @@ final class ScanResultTest extends TestCase
         $result->addFindings([$first, $second]);
 
         $this->assertSame([$first, $second], $result->getFindings());
+    }
+
+    public function test_has_failing_findings_with_default_config(): void
+    {
+        $result = new ScanResult();
+        $result->addFindings([$this->makeFinding(riskScore: 5)]);
+
+        $this->assertTrue($result->hasFailingFindings(new ScanConfig()));
+    }
+
+    public function test_no_failing_findings_when_empty(): void
+    {
+        $result = new ScanResult();
+
+        $this->assertFalse($result->hasFailingFindings(new ScanConfig()));
+    }
+
+    public function test_has_failing_findings_respects_min_score(): void
+    {
+        $result = new ScanResult();
+        $result->addFindings([$this->makeFinding(riskScore: 4)]);
+
+        $this->assertFalse($result->hasFailingFindings(new ScanConfig(failOnScore: 5)));
+        $this->assertTrue($result->hasFailingFindings(new ScanConfig(failOnScore: 4)));
+    }
+
+    public function test_has_failing_findings_respects_min_severity(): void
+    {
+        $result = new ScanResult();
+        $result->addFindings([$this->makeFinding(riskScore: 4)]); // MEDIUM
+
+        $this->assertFalse($result->hasFailingFindings(new ScanConfig(failOnSeverity: 'HIGH')));
+        $this->assertTrue($result->hasFailingFindings(new ScanConfig(failOnSeverity: 'MEDIUM')));
+    }
+
+    public function test_has_failing_findings_requires_both_thresholds(): void
+    {
+        $result = new ScanResult();
+        $result->addFindings([$this->makeFinding(riskScore: 4)]); // score 4, MEDIUM
+
+        // score too high but severity ok → not failing
+        $this->assertFalse($result->hasFailingFindings(new ScanConfig(failOnScore: 9, failOnSeverity: 'LOW')));
+        // score ok but severity too high → not failing
+        $this->assertFalse($result->hasFailingFindings(new ScanConfig(failOnScore: 1, failOnSeverity: 'HIGH')));
+        // both ok → failing
+        $this->assertTrue($result->hasFailingFindings(new ScanConfig(failOnScore: 4, failOnSeverity: 'MEDIUM')));
+    }
+
+    public function test_has_failing_findings_when_only_some_findings_qualify(): void
+    {
+        $result = new ScanResult();
+        $result->addFindings([
+            $this->makeFinding(riskScore: 2), // LOW — below HIGH threshold
+            $this->makeFinding(riskScore: 9), // CRITICAL — above HIGH threshold
+        ]);
+
+        $this->assertTrue($result->hasFailingFindings(new ScanConfig(failOnSeverity: 'HIGH')));
     }
 
     private function makeFinding(int $riskScore): Finding

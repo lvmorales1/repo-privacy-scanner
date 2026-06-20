@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lvmorales1\PrivacyScanner\Scanner;
 
+use Lvmorales1\PrivacyScanner\Config\ScanConfig;
 use Lvmorales1\PrivacyScanner\Finding;
 
 final class ScanResult
@@ -39,6 +40,17 @@ final class ScanResult
     public function isEmpty(): bool
     {
         return empty($this->findings);
+    }
+
+    public function hasFailingFindings(ScanConfig $config): bool
+    {
+        foreach ($this->findings as $finding) {
+            if ($config->isFailing($finding)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function getRiskScore(): int

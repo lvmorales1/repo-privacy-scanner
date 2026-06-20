@@ -20,4 +20,25 @@ enum Severity: string
             default     => self::Critical,
         };
     }
+
+    public static function fromString(string $value): self
+    {
+        return match (strtoupper($value)) {
+            'LOW'      => self::Low,
+            'MEDIUM'   => self::Medium,
+            'HIGH'     => self::High,
+            'CRITICAL' => self::Critical,
+            default    => throw new \InvalidArgumentException("Unknown severity: {$value}"),
+        };
+    }
+
+    public function level(): int
+    {
+        return match ($this) {
+            self::Low      => 1,
+            self::Medium   => 2,
+            self::High     => 3,
+            self::Critical => 4,
+        };
+    }
 }
